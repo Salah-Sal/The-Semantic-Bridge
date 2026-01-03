@@ -4,7 +4,7 @@
 
 The Semantic Bridge translates meaning, not just words. Instead of pattern-matching translation, it extracts the Universal Logic (AMR) from English and forces reconstruction of that exact logic in Arabic, then verifies the semantic preservation.
 
-## 🚀 Quick Start (5 minutes)
+## Quick Start (5 minutes)
 
 ```bash
 # 1. Setup
