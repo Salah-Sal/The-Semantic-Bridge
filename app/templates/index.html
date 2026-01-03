@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Semantic Bridge | جسر المعنى</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #111118;
+            --bg-tertiary: #18181f;
+            --bg-card: #1a1a24;
+            --bg-elevated: #222230;
+            --border-subtle: #2a2a3a;
+            --border-accent: #3a3a5a;
+            
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6a6a80;
+            
+            --accent-step1: #4ecdc4;     /* Teal - English/AMR extraction */
+            --accent-step2: #f7b733;     /* Gold - Arabic generation */
+            --accent-step3: #a855f7;     /* Purple - Reverse parsing */
+            --accent-step4: #22c55e;     /* Green - Verification */
+            --accent-fail: #ef4444;      /* Red - Failures */
+            --accent-semantic: #7b68ee;  /* Slate blue - AMR */
+            
+            --glow-step1: rgba(78, 205, 196, 0.2);
+            --glow-step2: rgba(247, 183, 51, 0.2);
+            --glow-step3: rgba(168, 85, 247, 0.2);
+            --glow-step4: rgba(34, 197, 94, 0.2);
+            
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-arabic: 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-serif);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 2.5rem 2rem 1.5rem;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-bridge {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--accent-step1), var(--accent-semantic), var(--accent-step2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-family: var(--font-arabic);
+            font-size: 1.2rem;
+            color: var(--accent-step2);
+            direction: rtl;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-style: italic;
+            margin-top: 0.75rem;
+            max-width: 550px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        /* Input section */
+        .input-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-label .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-step1);
+            border-radius: 50%;
+        }
+
+        .examples-toggle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .examples-toggle:hover {
+            color: var(--text-secondary);
+        }
+
+        .examples-list {
+            display: none;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .examples-list.visible {
+            display: flex;
+        }
+
+        .example-btn {
+            padding: 0.4rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-serif);
+        }
+
+        .example-btn:hover {
+            border-color: var(--accent-step1);
+            color: var(--text-primary);
+        }
+
+        /* Model Selector */
+        .model-selector-row {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+
+        .model-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .model-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .model-select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 0.5rem 2rem 0.5rem 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236a6a80' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            min-width: 180px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .model-select:hover {
+            border-color: var(--accent-semantic);
+        }
+
+        .model-select:focus {
+            outline: none;
+            border-color: var(--accent-semantic);
+            box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.2);
+        }
+
+        .model-select option {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.5rem;
+        }
+
+        .provider-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .provider-badge.openai {
+            background: rgba(16, 163, 127, 0.15);
+            color: #10a37f;
+            border: 1px solid rgba(16, 163, 127, 0.3);
+        }
+
+        .provider-badge.anthropic {
+            background: rgba(204, 150, 93, 0.15);
+            color: #cc965d;
+            border: 1px solid rgba(204, 150, 93, 0.3);
+        }
+
+        .provider-badge.gemini {
+            background: rgba(66, 133, 244, 0.15);
+            color: #4285f4;
+            border: 1px solid rgba(66, 133, 244, 0.3);
+        }
+
+        .model-info {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .model-selector-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            .model-info {
+                margin-left: 0;
+            }
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        textarea {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            resize: none;
+            min-height: 60px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-step1);
+            box-shadow: 0 0 0 3px var(--glow-step1);
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .btn {
+            padding: 0 2rem;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-semantic), #5a4fd0);
+            color: white;
+            font-weight: 600;
+            min-width: 160px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(123, 104, 238, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Pipeline Section */
+        .pipeline-section {
+            display: none;
+        }
+
+        .pipeline-section.visible {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pipeline Header */
+        .pipeline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .pipeline-title {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pipeline-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .pipeline-status.verified {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-step4);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .pipeline-status.failed {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-fail);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .pipeline-status.processing {
+            background: rgba(123, 104, 238, 0.15);
+            color: var(--accent-semantic);
+            border: 1px solid rgba(123, 104, 238, 0.3);
+        }
+
+        /* Step Cards */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .step-card.step-1 { --step-color: var(--accent-step1); --step-glow: var(--glow-step1); }
+        .step-card.step-2 { --step-color: var(--accent-step2); --step-glow: var(--glow-step2); }
+        .step-card.step-3 { --step-color: var(--accent-step3); --step-glow: var(--glow-step3); }
+        .step-card.step-4 { --step-color: var(--accent-step4); --step-glow: var(--glow-step4); }
+
+        .step-card.active {
+            border-color: var(--step-color);
+            box-shadow: 0 0 20px var(--step-glow);
+        }
+
+        .step-card.complete {
+            border-color: var(--border-accent);
+        }
+
+        .step-card.error {
+            border-color: var(--accent-fail);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-subtle);
+            cursor: pointer;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border-subtle);
+            border-radius: 50%;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .step-card.active .step-number,
+        .step-card.complete .step-number {
+            background: var(--step-color);
+            border-color: var(--step-color);
+            color: var(--bg-primary);
+        }
+
+        .step-card.error .step-number {
+            background: var(--accent-fail);
+            border-color: var(--accent-fail);
+            color: white;
+        }
+
+        .step-info {
+            flex: 1;
+        }
+
+        .step-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.15rem;
+        }
+
+        .step-description {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .step-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .step-status.pending {
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+        }
+
+        .step-status.processing {
+            background: rgba(123, 104, 238, 0.2);
+            color: var(--accent-semantic);
+        }
+
+        .step-status.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--accent-step4);
+        }
+
+        .step-status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-fail);
+        }
+
+        .step-toggle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+        }
+
+        .step-card.expanded .step-toggle {
+            transform: rotate(180deg);
+        }
+
+        /* Step Content */
+        .step-content {
+            display: none;
+            padding: 1.25rem;
+        }
+
+        .step-card.expanded .step-content {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .io-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .io-container {
+                grid-template-columns: 1fr;
+            }
+            .io-arrow {
+                transform: rotate(90deg);
+                justify-self: center;
+            }
+        }
+
+        .io-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .io-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            background: var(--bg-tertiary);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .io-label .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .io-label .dot.input { background: var(--text-muted); }
+        .io-label .dot.output { background: var(--step-color); }
+
+        .io-value {
+            padding: 1rem;
+            min-height: 80px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .io-value.english {
+            font-size: 1.05rem;
+            color: var(--text-primary);
+        }
+
+        .io-value.amr {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            white-space: pre;
+            color: var(--accent-semantic);
+            line-height: 1.5;
+        }
+
+        .io-value.arabic {
+            font-family: var(--font-arabic);
+            font-size: 1.4rem;
+            direction: rtl;
+            text-align: right;
+            color: var(--accent-step2);
+            line-height: 1.7;
+        }
+
+        .io-value.empty {
+            color: var(--text-muted);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .transliteration {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border-subtle);
+        }
+
+        .semantic-notes {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .io-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0;
+            color: var(--step-color);
+            font-size: 1.5rem;
+        }
+
+        /* Comparison view for step 4 */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .comparison-label {
+            padding: 0.6rem 1rem;
+            background: var(--bg-tertiary);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .comparison-value {
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            white-space: pre;
+            color: var(--accent-semantic);
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Verification Result */
+        .verification-result {
+            margin-top: 1.25rem;
+            padding: 1.25rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .verification-result.verified {
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .verification-result.failed {
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .verification-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .verification-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .verification-icon.verified {
+            background: var(--accent-step4);
+            color: white;
+        }
+
+        .verification-icon.failed {
+            background: var(--accent-fail);
+            color: white;
+        }
+
+        .verification-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .verification-title.verified { color: var(--accent-step4); }
+        .verification-title.failed { color: var(--accent-fail); }
+
+        .metrics-row {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--accent-step4);
+        }
+
+        .verification-result.failed .metric-value {
+            color: var(--accent-fail);
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .differences-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .differences-title {
+            font-size: 0.85rem;
+            color: var(--accent-fail);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .differences-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .difference-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 0.5rem 0.75rem;
+            background: rgba(239, 68, 68, 0.05);
+            border-radius: 4px;
+        }
+
+        .difference-item::before {
+            content: '!';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-fail);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Step details */
+        .step-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border-subtle);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Final Result Banner */
+        .final-result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .final-result.verified {
+            border: 2px solid var(--accent-step4);
+            box-shadow: 0 0 30px var(--glow-step4);
+        }
+
+        .final-result.failed {
+            border: 2px solid var(--accent-fail);
+        }
+
+        .final-arabic {
+            flex: 1;
+        }
+
+        .final-arabic-text {
+            font-family: var(--font-arabic);
+            font-size: 2rem;
+            direction: rtl;
+            text-align: right;
+            color: var(--accent-step2);
+            line-height: 1.6;
+        }
+
+        .final-translit {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        .final-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 1rem 1.5rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 8px;
+        }
+
+        .final-result.failed .final-badge {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .final-icon {
+            font-size: 2rem;
+        }
+
+        .final-score {
+            font-family: var(--font-mono);
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--accent-step4);
+        }
+
+        .final-result.failed .final-score {
+            color: var(--accent-fail);
+        }
+
+        .final-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: var(--accent-semantic);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header { padding: 1.5rem 1rem; }
+            h1 { font-size: 1.4rem; }
+            .container { padding: 1rem; }
+            .input-row { flex-direction: column; }
+            .btn { width: 100%; padding: 0.85rem; }
+            .final-result { flex-direction: column; text-align: center; }
+            .final-arabic-text { text-align: center; font-size: 1.6rem; }
+            .final-translit { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <span class="logo-bridge">⟨⟩</span>
+            <div>
+                <h1>The Semantic Bridge</h1>
+                <div class="subtitle">جسر المعنى</div>
+            </div>
+        </div>
+        <p class="tagline">
+            Translate meaning, not words. Using Abstract Meaning Representation
+            to ensure semantic fidelity.
+        </p>
+    </header>
+
+    <main class="container">
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-header">
+                <div class="input-label">
+                    <span class="dot"></span>
+                    English Input
+                </div>
+                <div class="examples-toggle" onclick="toggleExamples()">
+                    <span id="examples-arrow">▶</span> Examples
+                </div>
+            </div>
+            <div class="examples-list" id="examples-list">
+                <button class="example-btn" onclick="setExample('The committee did not approve the decision.')">
+                    Negation test
+                </button>
+                <button class="example-btn" onclick="setExample('The boy wants to go to school.')">
+                    Embedded clause
+                </button>
+                <button class="example-btn" onclick="setExample('She believes that he is honest.')">
+                    Propositional attitude
+                </button>
+                <button class="example-btn" onclick="setExample('The teacher gave the student a book.')">
+                    Ditransitive verb
+                </button>
+                <button class="example-btn" onclick="setExample('If it rains, the match will be cancelled.')">
+                    Conditional
+                </button>
+            </div>
+            
+            <!-- Model Selector -->
+            <div class="model-selector-row">
+                <div class="model-group">
+                    <span class="model-label">Provider:</span>
+                    <select class="model-select" id="provider-select" onchange="updateModelOptions()">
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="gemini">Google Gemini</option>
+                    </select>
+                </div>
+                <div class="model-group">
+                    <span class="model-label">Model:</span>
+                    <select class="model-select" id="model-select">
+                        <option value="gpt-4-turbo-preview">GPT-4 Turbo</option>
+                        <option value="gpt-4o">GPT-4o</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                    </select>
+                </div>
+                <span class="provider-badge openai" id="provider-badge">
+                    <span>⚡</span> OpenAI
+                </span>
+                <span class="model-info" id="model-info">Uses your API key from .env</span>
+            </div>
+            
+            <div class="input-row">
+                <textarea 
+                    id="english-input" 
+                    placeholder="Enter an English sentence to translate..."
+                    rows="2"
+                >The committee did not approve the decision.</textarea>
+                <button class="btn btn-primary" id="translate-btn" onclick="doTranslate()">
+                    <span class="btn-text">Translate</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Pipeline Section -->
+        <section class="pipeline-section" id="pipeline-section">
+            <div class="pipeline-header">
+                <div class="pipeline-title">
+                    <span>⚙️</span>
+                    <span>Translation Pipeline</span>
+                </div>
+                <div class="pipeline-status" id="pipeline-status">
+                    <span class="status-icon"></span>
+                    <span class="status-text">Processing...</span>
+                </div>
+            </div>
+
+            <div class="steps-container" id="steps-container">
+                <!-- Steps will be rendered here -->
+            </div>
+
+            <!-- Final Result -->
+            <div class="final-result" id="final-result" style="display: none;">
+                <div class="final-arabic">
+                    <div class="final-arabic-text" id="final-arabic-text"></div>
+                    <div class="final-translit" id="final-translit"></div>
+                </div>
+                <div class="final-badge">
+                    <span class="final-icon" id="final-icon">✓</span>
+                    <span class="final-score" id="final-score">100%</span>
+                    <span class="final-label">Smatch F1</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            Powered by <a href="https://amr.isi.edu/" target="_blank">Abstract Meaning Representation</a>
+            and the <a href="https://github.com/snowblink14/smatch" target="_blank">Smatch metric</a>
+        </p>
+    </footer>
+
+    <script>
+        let currentData = null;
+
+        function toggleExamples() {
+            const list = document.getElementById('examples-list');
+            const arrow = document.getElementById('examples-arrow');
+            list.classList.toggle('visible');
+            arrow.textContent = list.classList.contains('visible') ? '▼' : '▶';
+        }
+
+        function setExample(text) {
+            document.getElementById('english-input').value = text;
+        }
+
+        function toggleStep(stepNum) {
+            const card = document.querySelector(`.step-card.step-${stepNum}`);
+            if (card) {
+                card.classList.toggle('expanded');
+            }
+        }
+
+        // Model options for each provider
+        let modelOptions = {
+            openai: [
+                { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo' },
+                { value: 'gpt-4o', label: 'GPT-4o' },
+                { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+                { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
+            ],
+            anthropic: [
+                { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
+                { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet' },
+                { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku' },
+                { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' }
+            ],
+            gemini: [
+                { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro Preview' },
+                { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash Preview' }
+            ]
+        };
+
+        const providerInfo = {
+            openai: { icon: '⚡', name: 'OpenAI', class: 'openai' },
+            anthropic: { icon: '🧠', name: 'Anthropic', class: 'anthropic' },
+            gemini: { icon: '✨', name: 'Google Gemini', class: 'gemini' }
+        };
+
+        let providerAvailability = {
+            openai: true,
+            anthropic: true,
+            gemini: true
+        };
+
+        // Fetch available providers on page load
+        async function fetchProviders() {
+            try {
+                const response = await fetch('/providers');
+                const data = await response.json();
+                
+                // Update availability
+                for (const [key, info] of Object.entries(data.providers)) {
+                    providerAvailability[key] = info.available;
+                    
+                    // Update model options from server
+                    if (info.models) {
+                        modelOptions[key] = info.models.map(m => ({
+                            value: m.id,
+                            label: m.name
+                        }));
+                    }
+                }
+                
+                // Update provider select to show availability
+                const providerSelect = document.getElementById('provider-select');
+                Array.from(providerSelect.options).forEach(opt => {
+                    const available = providerAvailability[opt.value];
+                    opt.textContent = `${providerInfo[opt.value].name}${available ? '' : ' (no API key)'}`;
+                    if (!available) {
+                        opt.style.color = 'var(--text-muted)';
+                    }
+                });
+                
+                // Set default provider
+                if (data.default_provider) {
+                    providerSelect.value = data.default_provider;
+                    updateModelOptions();
+                }
+            } catch (e) {
+                console.log('Could not fetch providers:', e);
+            }
+        }
+
+        function updateModelOptions() {
+            const provider = document.getElementById('provider-select').value;
+            const modelSelect = document.getElementById('model-select');
+            const badge = document.getElementById('provider-badge');
+            const modelInfo = document.getElementById('model-info');
+            
+            // Update model dropdown
+            modelSelect.innerHTML = '';
+            modelOptions[provider].forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.label;
+                modelSelect.appendChild(option);
+            });
+            
+            // Update provider badge
+            const info = providerInfo[provider];
+            badge.className = `provider-badge ${info.class}`;
+            badge.innerHTML = `<span>${info.icon}</span> ${info.name}`;
+            
+            // Update model info
+            const available = providerAvailability[provider];
+            if (available) {
+                modelInfo.textContent = 'API key configured ✓';
+                modelInfo.style.color = 'var(--accent-step4)';
+            } else {
+                modelInfo.textContent = '⚠️ No API key in .env';
+                modelInfo.style.color = 'var(--accent-fail)';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', fetchProviders);
+
+        async function doTranslate() {
+            const input = document.getElementById('english-input').value.trim();
+            if (!input) {
+                alert('Please enter some text to translate.');
+                return;
+            }
+
+            const provider = document.getElementById('provider-select').value;
+            const model = document.getElementById('model-select').value;
+
+            const btn = document.getElementById('translate-btn');
+            const btnText = btn.querySelector('.btn-text');
+            const originalText = btnText.textContent;
+            
+            // Show loading state
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loading-spinner"></span>';
+            
+            // Show pipeline section
+            const pipelineSection = document.getElementById('pipeline-section');
+            pipelineSection.classList.add('visible');
+            
+            // Reset pipeline status
+            updatePipelineStatus('processing', 'Processing...');
+            document.getElementById('final-result').style.display = 'none';
+            
+            // Create initial steps (all pending)
+            renderInitialSteps();
+
+            try {
+                // Animate through steps
+                for (let i = 1; i <= 4; i++) {
+                    await animateStepStart(i);
+                    await new Promise(r => setTimeout(r, 200));
+                }
+
+                // Make API call with provider and model
+                const response = await fetch('/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: input,
+                        provider: provider,
+                        model: model
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                currentData = data;
+
+                // Render complete results
+                renderSteps(data.steps);
+                renderFinalResult(data);
+                
+                // Update pipeline status
+                if (data.is_verified) {
+                    updatePipelineStatus('verified', 'Verified ✓');
+                } else {
+                    updatePipelineStatus('failed', 'Verification Failed');
+                }
+
+            } catch (error) {
+                console.error('Translation error:', error);
+                updatePipelineStatus('failed', 'Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = originalText;
+            }
+        }
+
+        function renderInitialSteps() {
+            const container = document.getElementById('steps-container');
+            const stepData = [
+                { num: 1, name: 'AMR Extraction', desc: 'Parse English into Abstract Meaning Representation' },
+                { num: 2, name: 'Arabic Generation', desc: 'Render AMR graph into natural Arabic' },
+                { num: 3, name: 'Reverse Parsing', desc: 'Parse Arabic back into AMR for verification' },
+                { num: 4, name: 'Semantic Comparison', desc: 'Compare source and reconstructed AMR graphs' }
+            ];
+
+            container.innerHTML = stepData.map(step => `
+                <div class="step-card step-${step.num}" onclick="toggleStep(${step.num})">
+                    <div class="step-header">
+                        <div class="step-number">${step.num}</div>
+                        <div class="step-info">
+                            <div class="step-name">${step.name}</div>
+                            <div class="step-description">${step.desc}</div>
+                        </div>
+                        <div class="step-status pending">Pending</div>
+                        <div class="step-toggle">▼</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="io-value empty">Waiting for processing...</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function animateStepStart(stepNum) {
+            const card = document.querySelector(`.step-card.step-${stepNum}`);
+            if (card) {
+                card.classList.add('active');
+                const status = card.querySelector('.step-status');
+                status.className = 'step-status processing';
+                status.innerHTML = '<span class="loading-spinner"></span> Processing';
+            }
+        }
+
+        function renderSteps(steps) {
+            const container = document.getElementById('steps-container');
+            container.innerHTML = steps.map((step, idx) => renderStepCard(step, idx)).join('');
+            
+            // Auto-expand step 4 if failed
+            const lastStep = steps[3];
+            if (lastStep && lastStep.status === 'error') {
+                const card = document.querySelector('.step-card.step-4');
+                if (card) card.classList.add('expanded');
+            }
+        }
+
+        function renderStepCard(step, idx) {
+            const statusClass = step.status === 'success' ? 'success' : (step.status === 'error' ? 'error' : 'pending');
+            const cardClass = step.status === 'success' ? 'complete' : (step.status === 'error' ? 'error' : '');
+            const expanded = idx === 3 ? 'expanded' : ''; // Expand last step by default
+            
+            return `
+                <div class="step-card step-${step.number} ${cardClass} ${expanded}" onclick="toggleStep(${step.number})">
+                    <div class="step-header">
+                        <div class="step-number">${step.number}</div>
+                        <div class="step-info">
+                            <div class="step-name">${step.name}</div>
+                            <div class="step-description">${step.description}</div>
+                        </div>
+                        <div class="step-status ${statusClass}">
+                            ${step.status === 'success' ? '✓ Complete' : (step.status === 'error' ? '✗ Failed' : 'Pending')}
+                        </div>
+                        <div class="step-toggle">▼</div>
+                    </div>
+                    <div class="step-content">
+                        ${renderStepContent(step)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStepContent(step) {
+            if (step.number === 4) {
+                return renderComparisonStep(step);
+            }
+
+            const inputType = getValueClass(step.input.type);
+            const outputType = getValueClass(step.output.type);
+            
+            let outputHtml = '';
+            if (step.output.type === 'arabic') {
+                outputHtml = `
+                    <div class="io-value ${outputType}">${step.output.value || '<span class="empty">—</span>'}</div>
+                    ${step.output.transliteration ? `<div class="transliteration">${step.output.transliteration}</div>` : ''}
+                    ${step.output.notes ? `<div class="semantic-notes">${step.output.notes}</div>` : ''}
+                `;
+            } else {
+                outputHtml = `<div class="io-value ${outputType}">${step.output.value || '<span class="empty">—</span>'}</div>`;
+            }
+
+            return `
+                <div class="io-container">
+                    <div class="io-box">
+                        <div class="io-label"><span class="dot input"></span> ${step.input.label}</div>
+                        <div class="io-value ${inputType}">${step.input.value || '<span class="empty">—</span>'}</div>
+                    </div>
+                    <div class="io-arrow">→</div>
+                    <div class="io-box">
+                        <div class="io-label"><span class="dot output"></span> ${step.output.label}</div>
+                        ${outputHtml}
+                    </div>
+                </div>
+                <div class="step-details">${step.details}</div>
+            `;
+        }
+
+        function renderComparisonStep(step) {
+            const result = step.output.value;
+            const verified = result.verified;
+            
+            let differencesHtml = '';
+            if (result.differences && result.differences.length > 0) {
+                differencesHtml = `
+                    <div class="differences-section">
+                        <div class="differences-title">
+                            <span>⚠️</span> Semantic Differences Detected
+                        </div>
+                        <div class="differences-list">
+                            ${result.differences.map(d => `<div class="difference-item">${d}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="comparison-container">
+                    <div class="comparison-box">
+                        <div class="comparison-label">Source AMR (from English)</div>
+                        <div class="comparison-value">${step.input.value.source || '—'}</div>
+                    </div>
+                    <div class="comparison-box">
+                        <div class="comparison-label">Reconstructed AMR (from Arabic)</div>
+                        <div class="comparison-value">${step.input.value.reconstructed || '—'}</div>
+                    </div>
+                </div>
+                <div class="verification-result ${verified ? 'verified' : 'failed'}">
+                    <div class="verification-header">
+                        <div class="verification-icon ${verified ? 'verified' : 'failed'}">
+                            ${verified ? '✓' : '✗'}
+                        </div>
+                        <div class="verification-title ${verified ? 'verified' : 'failed'}">
+                            ${verified ? 'Semantic Verification Passed' : 'Semantic Verification Failed'}
+                        </div>
+                    </div>
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <div class="metric-value">${(result.smatch_score * 100).toFixed(1)}%</div>
+                            <div class="metric-label">Smatch F1</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${(result.precision * 100).toFixed(1)}%</div>
+                            <div class="metric-label">Precision</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${(result.recall * 100).toFixed(1)}%</div>
+                            <div class="metric-label">Recall</div>
+                        </div>
+                    </div>
+                    ${differencesHtml}
+                </div>
+                <div class="step-details">${step.details}</div>
+            `;
+        }
+
+        function getValueClass(type) {
+            switch (type) {
+                case 'english': return 'english';
+                case 'amr': return 'amr';
+                case 'arabic': return 'arabic';
+                default: return '';
+            }
+        }
+
+        function renderFinalResult(data) {
+            const finalResult = document.getElementById('final-result');
+            const verified = data.is_verified;
+            
+            finalResult.className = `final-result ${verified ? 'verified' : 'failed'}`;
+            finalResult.style.display = 'flex';
+            
+            document.getElementById('final-arabic-text').textContent = data.arabic_text || '—';
+            document.getElementById('final-translit').textContent = data.transliteration || '';
+            document.getElementById('final-icon').textContent = verified ? '✓' : '✗';
+            document.getElementById('final-score').textContent = `${(data.smatch_score * 100).toFixed(1)}%`;
+            
+            // Scroll to result
+            finalResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function updatePipelineStatus(status, text) {
+            const statusEl = document.getElementById('pipeline-status');
+            statusEl.className = `pipeline-status ${status}`;
+            
+            let icon = '';
+            if (status === 'processing') icon = '<span class="loading-spinner"></span>';
+            else if (status === 'verified') icon = '✓';
+            else if (status === 'failed') icon = '✗';
+            
+            statusEl.innerHTML = `<span class="status-icon">${icon}</span><span class="status-text">${text}</span>`;
+        }
+
+        // Handle Enter key
+        document.getElementById('english-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                doTranslate();
+            }
+        });
+    </script>
+</body>
+</html>
